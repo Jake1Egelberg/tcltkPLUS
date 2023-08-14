@@ -1,0 +1,24 @@
+Package: tcltkPLUS
+Type: Package
+Title: A tcltk Wrapper for R
+Version: 1.0.0
+Author: Jacob Egelberg (2023)
+Maintainer: Jacob Egelberg <jake1egelberg@gmail.com>
+Description: tcltkPLUS provides a collection of wrapper functions for the tcltk package in R. Functions are designed with ease of use in mind and aim to simplify GUI building in R. tcltkPLUS also provides an easy way for compiling R scripts into self-contained apps that can be run via .bat files.  
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Depends: 
+    R (>= 2.10),
+    tcltk,
+    tkrplot,
+    stringr,
+    this.path,
+    ggplot2
+Suggests: 
+    testthat (>= 3.0.0)
+Imports:
+    utils,
+    methods
+Config/testthat/edition: 3
+RoxygenNote: 7.2.3
