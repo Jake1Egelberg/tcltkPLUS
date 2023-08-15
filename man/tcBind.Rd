@@ -15,7 +15,7 @@ tcBind(event, fun)
 \arguments{
   \item{event}{
 %%     ~~Describe \code{x} here~~
-A valid tcltk binding event. For a list of all binding events, see \code{\link{get_events}()}.
+A valid tcltk binding event. For a list of all binding events, see \code{binding_events}.
 }
 \item{fun}{
 The function name, as a string, that you would like to call when the binding event is detected.

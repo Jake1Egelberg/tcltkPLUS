@@ -1,98 +1,16 @@
 
-# ---------------------------------CREATE GENERAL FUNCTIONS FOR PACKAGE
+#TO DO
+#Document data
 
+#Set a param to allow saving to global environment
 #' @param pos defaults to 1 which equals an assingment to global environment
 
-#Save binding events
-binding_events<-data.frame(
-  Widget=c(rep("GLOBAL",times=11),"tcListbox","tcCombobox"),
-  Event=c("<Button>",
-          "<Button-1>",
-          "<Button-2>",
-          "<Button-3>",
-          "<Motion>",
-          "<ButtonRelease>",
-          "<Double-Button>",
-          "<Enter>",
-          "<Leave>",
-          "<Return>",
-          "<Key>",
-          "<<ListboxSelect>>",
-          "<<ComboboxSelected>>"),
-  Description=c("A mouse button is pressed",
-                "The left mouse button is pressed",
-                "The middle mouse button is pressed",
-                "The right mouse button is pressed",
-                "A mouse button is pressed and the cursor is moved simultaneously",
-                "A mouse button is released",
-                "A mouse button is double clicked",
-                "The cursor entered a widget",
-                "The cursor left a widget",
-                "The Enter key is pressed",
-                "Any key is pressed",
-                "A listbox element is selected",
-                "A combobox element is selected")
-)
-
-common_functions<-data.frame(
-  Syntax=c("tcl('update')",
-           "tk_messageBox()",
-           "tk_select.list()",
-           "tk_choose.files()",
-           "tk_choose.dir()"),
-  Purpose=c("Forces an update of the tcl window.",
-            "Creates a prompt with a message and returns the user's response",
-            "Creates a prompt with a list of options and returns the user's selection.",
-            "Opens a file selection window.",
-            "Opens a directory selection window."),
-  More=c("NA",
-         "?tk_messageBox",
-         "?tk_select.list",
-         "?tk_choose.files",
-         "?tk_choose.dir")
-)
-
-#Define themes
-DEFAULT<-list(
-  Background="gray95",
-  WidgetBackground="gray95",
-  TextColor="black",
-  TextSize=10,
-  TextFamily="Arial"
-)
-LARGE<-list(
-  Background="gray95",
-  WidgetBackground="gray95",
-  TextColor="black",
-  TextSize=15,
-  TextFamily="Arial"
-)
-SMALL<-list(
-  Background="gray95",
-  WidgetBackground="gray95",
-  TextColor="black",
-  TextSize=8,
-  TextFamily="Arial"
-)
-RETRO<-list(
-  Background="violet",
-  WidgetBackground="purple",
-  TextColor="yellow3",
-  TextSize=12,
-  TextFamily="Comic Sans MS"
-)
-DARK<-list(
-  Background="gray20",
-  WidgetBackground="gray20",
-  TextColor="gray60",
-  TextSize=10,
-  TextFamily="Arial"
-)
+# ---------------------------INTERNAL FUNCTIONS
 
 # Parse position (for building ui)
 #' @keywords internal
-#' @NoRd
-grid_position<-function(widget,position,propogate=TRUE){
+#' @noRd
+.grid_position<-function(widget,position,propogate=TRUE){
 
   tkgrid(get(widget),
          column=position[1],
@@ -108,10 +26,10 @@ grid_position<-function(widget,position,propogate=TRUE){
 
 # Build a binding string
 #' @keywords internal
-#' @NoRd
-assign_bind<-function(widget,binding){
+#' @noRd
+.assign_bind<-function(widget,binding){
 
-  if(length(which(binding_events==binding[1]))>0){
+  if(length(which(tcltkPLUS::binding_events==binding[1]))>0){
     tkbind(get(widget),
            binding[1],
            get(binding[2]))
@@ -123,8 +41,8 @@ assign_bind<-function(widget,binding){
 
 # Curate names
 #' @keywords internal
-#' @NoRd
-cur_name<-function(name){
+#' @noRd
+.cur_name<-function(name){
   if(name!=""){
     out<-paste(name,"<-",sep="")
   } else{
@@ -135,15 +53,15 @@ cur_name<-function(name){
 
 # Define variable from widget
 #' @keywords internal
-#' @NoRd
-define_widget_var<-function(widget_name){
+#' @noRd
+.define_widget_var<-function(widget_name){
   return(paste(widget_name,"_TCVAR",sep=""))
 }
 
-#Parse widgets from widget list
+# Parse widgets from widget list
 #' @keywords internal
-#' @NoRd
-parse_widgets<-function(x,widget_list,pos=1){
+#' @noRd
+.parse_widgets<-function(x,widget_list,pos=1){
 
   #Set name to custom name if detected
   if(str_detect(widget_list[[x]]$Widget,"<-")==TRUE){
@@ -180,7 +98,7 @@ parse_widgets<-function(x,widget_list,pos=1){
       vals<-widget_list[[x]]$Convert[[i]]
 
       #Create tclVar
-      var_name<-define_widget_var(widget_list[[x]]$Name)
+      var_name<-.define_widget_var(widget_list[[x]]$Name)
       assign(var_name,
              tclVar(vals),
              envir=as.environment(pos)
@@ -213,8 +131,8 @@ parse_widgets<-function(x,widget_list,pos=1){
         scroll_pos[3]<-max(c(as.numeric(scroll_pos[3])-17,0))
 
         #Define widget position
-        grid_position(scroll_widget,
-                      scroll_pos)
+        .grid_position(scroll_widget,
+                                  scroll_pos)
 
         #Update listbox text
         scroll_fun<-paste("tkset(",scroll_widget,",...)",sep="")
@@ -240,9 +158,9 @@ parse_widgets<-function(x,widget_list,pos=1){
                        height=257*widget_list[[x]]$Other$SCALE[2]),
                envir=as.environment(pos))
         #Define widget position
-        grid_position(plot_frame,
-                      widget_list[[x]]$Position,
-                      propogate = FALSE)
+        .grid_position(plot_frame,
+                                  widget_list[[x]]$Position,
+                                  propogate = FALSE)
 
         #Overwrite existing frame
         widget_list[[x]]$Widget<-str_replace(widget_list[[x]]$Widget,frame_parent,plot_frame)
@@ -264,44 +182,26 @@ parse_widgets<-function(x,widget_list,pos=1){
   propogate_status<-ifelse(length(widget_list[[x]]$Other$PROPOGATE)>0,widget_list[[x]]$Other$PROPOGATE,FALSE)
 
   #Define widget position
-  grid_position(widget,
-                widget_list[[x]]$Position,
-                propogate = propogate_status)
+  .grid_position(widget,
+                            widget_list[[x]]$Position,
+                            propogate = propogate_status)
 
   #Define widget binding (if applicable)
   if(length(widget_list[[x]]$Binding)>0){
-    assign_bind(widget,
-                widget_list[[x]]$Binding)
+    .assign_bind(widget,
+                            widget_list[[x]]$Binding)
   }
 
 }
 
-# ---------------------------------CREATE USER ASSIST FUNCTIONS
 
-# Get all binding events
-#' @export get_common
-get_common<-function(){
-
-  print(common_functions)
-
-}
-
-# Get all binding events
-#' @export get_events
-get_events<-function(){
-
-  print(binding_events)
-
-}
-
-# ---------------------------UI MODIFICATION FUNCTIONS
+# ---------------------------PACKAGE FUNCTIONS
 
 #Set a theme
 #' @export tcTheme
 tcTheme<-function(theme_name="DEFAULT"){
   .GlobalEnv$tcCurrentTheme<-get(theme_name)
 }
-tcCurrentTheme<-get("DEFAULT")
 
 #Extract data from a widget
 #' @export tcGet
@@ -314,11 +214,11 @@ tcGet<-function(widget_name,widget_list){
 
     if(sel_widget$Class=="Entry"){
 
-      return(tclvalue(get(define_widget_var(sel_widget$Name))))
+      return(tclvalue(get(.define_widget_var(sel_widget$Name))))
 
     } else if(sel_widget$Class=="Combobox"){
 
-      return(tclvalue(get(define_widget_var(sel_widget$Name))))
+      return(tclvalue(get(.define_widget_var(sel_widget$Name))))
 
     } else if(sel_widget$Class=="Listbox"){
 
@@ -327,10 +227,10 @@ tcGet<-function(widget_name,widget_list){
 
     } else if(sel_widget$Class=="Checkbutton"){
 
-      return(tclvalue(get(define_widget_var(sel_widget$Name))))
+      return(tclvalue(get(.define_widget_var(sel_widget$Name))))
 
     } else if(sel_widget$Class=="Scrollbar"){
-      return(tclvalue(get(define_widget_var(sel_widget$Name))))
+      return(tclvalue(get(.define_widget_var(sel_widget$Name))))
     }
   } else{
     print(paste("Improper widget name: ",widget_name,". Returned ",as.character(length(which(all_names==widget_name)))," matches in widget list!",sep=""))
@@ -404,7 +304,7 @@ tcReplace<-function(old_widget_name,
            envir=parent.frame())
 
     #Create the new widget
-    parse_widgets(widget_ind,widget_list)
+    .parse_widgets(widget_ind,widget_list)
   } else{
     print(paste("Widget ",old_widget_name," not found!",sep=""))
   }
@@ -474,7 +374,7 @@ tcModify<-function(widget_name,
   tcDestroy(widget_name)
 
   #Parse new widget
-  parse_widgets(widget_ind,widget_list)
+  .parse_widgets(widget_ind,widget_list)
 
 }
 
@@ -492,7 +392,7 @@ tcAdd<-function(new_widget_object,
          envir=parent.frame())
 
   #Parse this single widget
-  parse_widgets(length(widget_list),widget_list)
+  .parse_widgets(length(widget_list),widget_list)
 
 }
 
@@ -539,7 +439,7 @@ tcBuild<-function(ui_name,
   invisible(lapply(seq_along(widget_list), function(x){
 
     # PARSE WIDGET LIST ELEMENT
-    parse_widgets(x,widget_list)
+    .parse_widgets(x,widget_list)
 
 
   }))
@@ -738,7 +638,7 @@ tcLabel<-function(parent,
                   binding=NULL){
 
   #Create text string for widget
-  widget_text<-paste(cur_name(name),"tklabel(parent=",parent,
+  widget_text<-paste(.cur_name(name),"tklabel(parent=",parent,
                     ",text='",text,"'",
                     ",fg='",color,"'",
                     ",background='",background,"'",
@@ -769,7 +669,7 @@ tcButton<-function(parent,
                    binding=NULL){
 
   #Create text string for widget
-  widget_text<-paste(cur_name(name),"tkbutton(parent=",parent,
+  widget_text<-paste(.cur_name(name),"tkbutton(parent=",parent,
                      ",text='",text,"'",
                      ",fg='",color,"'",
                      ",background='",background,"'",
@@ -801,7 +701,7 @@ tcCheckbox<-function(parent,
                      binding=NULL){
 
   #Create text string for widget
-  widget_text<-paste(cur_name(name),"tkcheckbutton(parent=",parent,
+  widget_text<-paste(.cur_name(name),"tkcheckbutton(parent=",parent,
                      ",text='",text,"'",
                      ",variable=VALUE",
                      ",fg='",color,"'",
@@ -839,7 +739,7 @@ tcListbox<-function(parent,
                     binding=NULL){
 
   #Create text string for widget
-  widget_text<-paste(cur_name(name),"tklistbox(parent=",parent,
+  widget_text<-paste(.cur_name(name),"tklistbox(parent=",parent,
                      ",listvariable=VALUES",
                      ",height=",height,
                      ",width=",width,
@@ -878,7 +778,7 @@ tcEntry<-function(parent,
                   binding=NULL){
 
   #Create text string for widget
-  widget_text<-paste(cur_name(name),"tkentry(parent=",parent,
+  widget_text<-paste(.cur_name(name),"tkentry(parent=",parent,
                      ",textvariable=TEXT",
                      ",fg='",color,"'",
                      ",background='",background,"'",
@@ -913,7 +813,7 @@ tcCombobox<-function(parent,
                      binding=NULL){
 
   #Create text string for widget
-  widget_text<-paste(cur_name(name),"ttkcombobox(parent=",parent,
+  widget_text<-paste(.cur_name(name),"ttkcombobox(parent=",parent,
                      ",values=VALUES",
                      ",textvariable=SELECTED",
                      ",justify='",justify,"'",
@@ -945,7 +845,7 @@ tcPlot<-function(parent,
                  own_frame=TRUE){
 
   #Create text string for widget
-  widget_text<-paste(cur_name(name),"tkrplot(parent=",parent,
+  widget_text<-paste(.cur_name(name),"tkrplot(parent=",parent,
                      ",fun=function() {plot(",ggplot,")}",
                      ",hscale=",hscale,
                      ",vscale=",vscale,
@@ -988,7 +888,7 @@ tcScrollbar<-function(parent,
                       binding=NULL){
 
   #Create text string for widget
-  widget_text<-paste(cur_name(name),"tkscale(parent=",parent,
+  widget_text<-paste(.cur_name(name),"tkscale(parent=",parent,
                      ",from=",from,
                      ",to=",to,
                      ",resolution=",resolution,
